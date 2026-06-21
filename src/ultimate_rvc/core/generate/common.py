@@ -63,6 +63,22 @@ else:
 logger = logging.getLogger(__name__)
 
 
+def _add_ffmpeg_paths() -> None:
+    """
+    Ensure ffmpeg/ffprobe are available on PATH.
+
+    BookForge fork: prefer the ffmpeg already provided by the environment (the
+    conda env ships ffmpeg), and only fall back to the optional ``static_ffmpeg``
+    package when it is missing. This lets the inference-only env drop the
+    static-ffmpeg dependency entirely.
+    """
+    import shutil
+
+    if shutil.which("ffmpeg") and shutil.which("ffprobe"):
+        return
+    static_ffmpeg.add_paths(weak=True)
+
+
 # NOTE consider increasing hash_size to 16. Otherwise
 # we might have problems with hash collisions when using app as CLI
 def get_unique_base_path(
@@ -144,7 +160,7 @@ def wavify(
         track if it is not in one of the accepted formats.
 
     """
-    static_ffmpeg.add_paths(weak=True)
+    _add_ffmpeg_paths()
 
     audio_path = validate_audio_file_exists(audio_track, Entity.AUDIO_TRACK)
     dir_path = validate_audio_dir_exists(directory, Entity.DIRECTORY)
@@ -490,7 +506,7 @@ def _mix_audio(
         The audio format of the mixed audio.
 
     """
-    static_ffmpeg.add_paths(weak=True)
+    _add_ffmpeg_paths()
     # NOTE The lazy_import function does not work with pydub
     # so we import it here manually
     import pydub  # noqa: PLC0415

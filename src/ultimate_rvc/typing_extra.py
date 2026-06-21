@@ -5,10 +5,16 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from enum import IntEnum, StrEnum
 from os import PathLike
+from typing import TypeAlias
 
-type StrPath = str | PathLike[str]
+# NOTE: PEP 695 `type X = ...` aliases (Python 3.12+) backported to 3.11-safe
+# form so this package can run in a Python 3.11 environment. The recursive Json
+# alias uses a string forward reference (the pre-3.12 idiom).
+StrPath: TypeAlias = str | PathLike[str]
 
-type Json = Mapping[str, Json] | Sequence[Json] | str | int | float | bool | None
+Json: TypeAlias = (
+    "Mapping[str, Json] | Sequence[Json] | str | int | float | bool | None"
+)
 
 
 class SeparationModel(StrEnum):

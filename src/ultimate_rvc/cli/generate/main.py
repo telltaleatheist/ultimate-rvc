@@ -23,8 +23,10 @@ from ultimate_rvc.cli.common import (
     complete_f0_method,
     format_duration,
 )
-from ultimate_rvc.cli.generate.song_cover import app as song_cover_app
-from ultimate_rvc.cli.generate.speech import app as speech_app
+# BookForge fork: the song-cover and speech subcommands are omitted. They eagerly
+# pull web-UI / TTS / stem-separation deps (anyio, edge-tts, audio-separator,
+# yt-dlp) that this inference-only env does not ship. Only `convert-voice` and
+# `wavify` (defined below) are kept.
 from ultimate_rvc.cli.typing_extra import PanelName
 from ultimate_rvc.core.generate.common import convert as _convert
 from ultimate_rvc.core.generate.common import wavify as _wavify
@@ -38,8 +40,7 @@ app = typer.Typer(
 )
 
 
-app.add_typer(song_cover_app)
-app.add_typer(speech_app)
+# BookForge fork: song_cover_app / speech_app intentionally not registered.
 
 
 @app.command(no_args_is_help=True)
