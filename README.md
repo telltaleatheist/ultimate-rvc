@@ -138,6 +138,48 @@ The Ultimate RVC project package can then be installed as follows:
 pip install ultimate-rvc
 ```
 
+### Audio separation (BookForge Enhance tab)
+
+This fork trims `audio-separator` out of the default dependency closure (it isn't
+needed for the `generate convert-voice` path). BookForge's **Enhance** tab uses it
+for speech / background separation, so re-add it into the **same** env after the
+steps above. Pin the already-installed torch so pip can't swap it for a CPU build —
+`torchvision` (pulled transitively via `onnx2torch-py313`) would otherwise drag a
+fresh CPU torch in and clobber the CUDA/MPS build. Write a `constraints.txt`:
+
+```
+torch==2.7.0
+torchvision==0.22.0
+numpy==2.2.5
+scipy==1.15.2
+librosa==0.10.2
+soundfile==0.13.1
+```
+
+(pin `torch`/`torchvision`/`numpy`/… to whatever the env already has;
+`torchvision` must match the installed torch: 2.7.0→0.22.0, 2.7.1→0.22.1,
+2.6.0→0.21.0.) Then, on **Windows / Linux (CUDA)**:
+
+```console
+python -m pip install -c constraints.txt \
+  --extra-index-url https://download.pytorch.org/whl/cu128 \
+  "audio-separator @ git+https://github.com/JackismyShephard/python-audio-separator@patch-1" \
+  onnxruntime-gpu torchvision==0.22.0
+```
+
+On **macOS (Apple Silicon)** use the default torch index and plain `onnxruntime`:
+
+```console
+python -m pip install -c constraints.txt \
+  "audio-separator @ git+https://github.com/JackismyShephard/python-audio-separator@patch-1" \
+  onnxruntime torchvision==<match-your-torch>
+```
+
+Invoke the separator CLI as `python -c "from audio_separator.utils.cli import main; main()" …`
+— `python -m audio_separator.utils.cli` is a silent no-op (the module has no
+`__main__` guard) and the generated console script bakes a stale interpreter path
+that breaks once the env is relocated.
+
 ### Usage
 
 The `ultimate-rvc` package can be used as a python library but is primarily intended to be used as a command line tool. The package exposes two top-level commands:
