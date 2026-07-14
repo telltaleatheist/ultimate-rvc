@@ -24,6 +24,10 @@ dependencies = [
 
     # CLI
     "typer==0.15.2",
+    # typer 0.15.2 calls click.Parameter.make_metavar() with the pre-8.2
+    # signature; click>=8.2 requires a ctx arg → make_metavar() TypeError on
+    # every command. Pin click below 8.2 so rebuilds don't float into the break.
+    "click<8.2",
 
     # Networking
     "requests==2.32.4",
